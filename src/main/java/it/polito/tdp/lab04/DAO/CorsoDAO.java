@@ -12,9 +12,6 @@ import it.polito.tdp.lab04.model.Studente;
 
 public class CorsoDAO {
 	
-	/*
-	 * Ottengo tutti i corsi salvati nel Db
-	 */
 	public List<Corso> getTuttiICorsi() {
 
 		final String sql = "SELECT * FROM corso";
@@ -36,8 +33,8 @@ public class CorsoDAO {
 
 				System.out.println(codins + " " + numeroCrediti + " " + nome + " " + periodoDidattico);
 
-				// Crea un nuovo JAVA Bean Corso
-				// Aggiungi il nuovo oggetto Corso alla lista corsi
+				Corso corso = new Corso(codins, numeroCrediti, nome, periodoDidattico);
+				corsi.add(corso);
 			}
 
 			conn.close();
@@ -46,11 +43,10 @@ public class CorsoDAO {
 			
 
 		} catch (SQLException e) {
-			// e.printStackTrace();
+			e.printStackTrace();
 			throw new RuntimeException("Errore Db", e);
 		}
 	}
-	
 	
 	/*
 	 * Dato un codice insegnamento, ottengo il corso
@@ -73,6 +69,45 @@ public class CorsoDAO {
 		// TODO
 		// ritorna true se l'iscrizione e' avvenuta con successo
 		return false;
+	}
+
+	public List<Corso> getCorsiStudente(int matricolaNumerica) {
+
+		final String sql = "select c.codins, crediti, nome, pd "
+				+ "from corso c, iscrizione i "
+				+ "where c.codins = i.codins and matricola = ?";
+
+		List<Corso> corsi = new LinkedList<Corso>();
+
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, matricolaNumerica);
+
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+
+				String codins = rs.getString("c.codins");
+				int numeroCrediti = rs.getInt("crediti");
+				String nome = rs.getString("nome");
+				int periodoDidattico = rs.getInt("pd");
+
+				System.out.println(codins + " " + numeroCrediti + " " + nome + " " + periodoDidattico);
+
+				Corso corso = new Corso(codins, numeroCrediti, nome, periodoDidattico);
+				corsi.add(corso);
+			}
+
+			conn.close();
+			
+			return corsi;
+			
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Errore Db", e);
+		}
 	}
 
 }
